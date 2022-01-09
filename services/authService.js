@@ -1,9 +1,9 @@
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-const express = require('express')
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const _ = require('lodash');
+const jwt = require('jsonwebtoken');
 
 exports.signUp = async (req, res) => {
     const { username, password, email } = req.body;
@@ -30,4 +30,40 @@ exports.signUp = async (req, res) => {
         }
     })
     res.json({ message:'User has been created successfully', user });
+}
+
+exports.generateAccessToken = (payload) => {
+    return jwt.sign(
+        payload, 'secret', { expiresIn: '15m' });
+}
+
+exports.generateRefreshToken = (payload) => {
+    return jwt.sign(
+        payload, 'refeshSecret', { expiresIn: '7d' });
+}
+
+exports.verifyRefreshToken = (refreshToken) => {
+    return jwt.sign(
+        refreshToken, 'refreshToken');
+}
+
+exports.login = async (req, res) => {
+    if (!req.body.email || !req.body.password) {
+        return res.status(400).json({
+            message: 'Please provide email and password'
+        });
+    }
+
+    const user = await prisma.user.findUnique({
+        where: {
+            email: req.body.email
+        }
+    });
+
+    const validPassword = await bcrypt.compare(req.body.password, user.password);
+    if (!validPassword) {
+        return res.status(401).json({
+            message: 'Invalid email or password'
+        });
+    }
 }
