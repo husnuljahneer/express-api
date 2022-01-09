@@ -1,0 +1,31 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model category {
+  id    Int     @id @default(autoincrement())
+  title String? @db.VarChar(255)
+}
+
+model posts {
+  id          Int     @id @default(autoincrement())
+  title       String? @db.VarChar(255)
+  description String? @db.VarChar(2500)
+  categoryId  Int?
+  posts       posts?  @relation("postsToposts_categoryId", fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "categoryID")
+  other_posts posts[] @relation("postsToposts_categoryId")
+
+  @@index([categoryId], map: "categoryID")
+}
+
+model user {
+  id       Int     @id @default(autoincrement())
+  name     String? @db.VarChar(255)
+  email    String? @unique @db.VarChar(255)
+  password String? @db.VarChar(255)
+}
