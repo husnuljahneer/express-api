@@ -5,12 +5,12 @@ const prisma = new PrismaClient()
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
-exports.signUp = async (req, res) => {
-    const { username, password, email } = req.body;
+exports.signUp = async ({name,email,password}}) => {
+    const { name, password, email } = req.body;
 
     const userExist = await prisma.user.findUnique({
         where: {
-            email : email
+            email
         }
     });
 
@@ -24,7 +24,7 @@ exports.signUp = async (req, res) => {
 
     const user = await prisma.user.create({
         data: {
-            username,
+            name,
             password: hashedPassword,
             email
         }
@@ -47,7 +47,7 @@ exports.verifyRefreshToken = (refreshToken) => {
         refreshToken, 'refreshToken');
 }
 
-exports.login = async (req, res) => {
+exports.login = async ({email, password}) => {
     if (!req.body.email || !req.body.password) {
         return res.status(400).json({
             message: 'Please provide email and password'
@@ -56,11 +56,11 @@ exports.login = async (req, res) => {
 
     const user = await prisma.user.findUnique({
         where: {
-            email: req.body.email
+            email
         }
     });
 
-    const validPassword = await bcrypt.compare(req.body.password, user.password);
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
         return res.status(401).json({
             message: 'Invalid email or password'
