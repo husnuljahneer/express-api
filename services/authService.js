@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
-exports.signUp = async ({name,email,password}}) => {
+exports.createUser = async ({name,email,password}) => {
     const { name, password, email } = req.body;
 
     const userExist = await prisma.user.findUnique({
@@ -47,7 +47,7 @@ exports.verifyRefreshToken = (refreshToken) => {
         refreshToken, 'refreshToken');
 }
 
-exports.login = async ({email, password}) => {
+exports.loginUser = async ({email, password}) => {
     if (!req.body.email || !req.body.password) {
         return res.status(400).json({
             message: 'Please provide email and password'
