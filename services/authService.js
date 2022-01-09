@@ -5,6 +5,7 @@ const prisma = new PrismaClient()
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 const CreateError = require('http-errors');
+const logger = require('../utils/logger');
 
 exports.createUser = async ({name,email,password}) => {
     try {
@@ -29,6 +30,7 @@ exports.createUser = async ({name,email,password}) => {
         })
         return user;
     } catch (err) {
+        logger.error(err);
         throw CreateError(400, err.message);
     }
 }
@@ -66,6 +68,7 @@ exports.loginUser = async ({email, password}) => {
         }
         return user;
     } catch (err) {
+        logger.error(err);
         throw CreateError(400, err.message);
     }
     
