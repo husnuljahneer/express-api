@@ -26,6 +26,7 @@
     "nodemon": "^2.0.15",
     "npm": "^8.3.0",
     "passport": "^0.5.2",
+    "passport-jwt": "^4.0.0",
     "prisma": "^3.7.0",
     "winston": "^3.3.3"
   }

@@ -6,8 +6,10 @@ const {
     logout,
     refreshToken
 } = require('../controllers/authController');
+// const jwtAuth = require('../middlewares/authMiddleware');
+// router.post('/:id', jwtAuth,updateUser);
 
-router.post('/signup', signup);
+router.post('/signup',signup);
 router.post('/login', login);
 router.post('/logout', logout);
 router.post('/refreshToken', refreshToken);

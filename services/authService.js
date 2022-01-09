@@ -6,6 +6,7 @@ const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 const CreateError = require('http-errors');
 const logger = require('../utils/logger');
+require("dotenv").config();
 
 exports.createUser = async ({name,email,password}) => {
     try {
@@ -37,17 +38,17 @@ exports.createUser = async ({name,email,password}) => {
 
 exports.generateAccessToken = (payload) => {
     return jwt.sign(
-        payload, 'secret', { expiresIn: '15m' });
+        payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' });
 }
 
 exports.generateRefreshToken = (payload) => {
     return jwt.sign(
-        payload, 'refeshSecret', { expiresIn: '7d' });
+        payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
 }
 
 exports.verifyRefreshToken = (refreshToken) => {
     return jwt.sign(
-        refreshToken, 'refreshToken');
+        refreshToken, process.env.JWT_REFRESH_SECRET);
 }
 
 exports.loginUser = async ({email, password}) => {
