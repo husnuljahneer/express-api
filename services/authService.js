@@ -4,32 +4,33 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
+const CreateError = require('http-errors');
 
 exports.createUser = async ({name,email,password}) => {
-    const { name, password, email } = req.body;
-
-    const userExist = await prisma.user.findUnique({
-        where: {
-            email
-        }
-    });
-
-    if (userExist) {
-        return res.status(400).json({
-            message: 'User already exist'
+    try {
+        const userExist = await prisma.user.findUnique({
+            where: {
+                email
+            }
         });
-    }
     
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    const user = await prisma.user.create({
-        data: {
-            name,
-            password: hashedPassword,
-            email
+        if (userExist) {
+            throw CreateError(409, 'User already exists');
         }
-    })
-    res.json({ message:'User has been created successfully', user });
+        
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+        const user = await prisma.user.create({
+            data: {
+                name,
+                password: hashedPassword,
+                email
+            }
+        })
+        return user;
+    } catch (err) {
+        throw CreateError(400, err.message);
+    }
 }
 
 exports.generateAccessToken = (payload) => {
@@ -48,22 +49,24 @@ exports.verifyRefreshToken = (refreshToken) => {
 }
 
 exports.loginUser = async ({email, password}) => {
-    if (!req.body.email || !req.body.password) {
-        return res.status(400).json({
-            message: 'Please provide email and password'
+    try {
+        const user = await prisma.user.findFirst({
+            where: {
+                email
+            }
         });
-    }
-
-    const user = await prisma.user.findUnique({
-        where: {
-            email
+    
+        if (!user) {
+            throw CreateError(400, 'Invalid Email or Password');
         }
-    });
-
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-        return res.status(401).json({
-            message: 'Invalid email or password'
-        });
+    
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+            throw CreateError(401, 'Invalid Email or Password');
+        }
+        return user;
+    } catch (err) {
+        throw CreateError(400, err.message);
     }
+    
 }
